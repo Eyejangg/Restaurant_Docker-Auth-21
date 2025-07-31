@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Restaurant from "../components/Restaurants";
+import RestaurantService from "../services/restaurant.service";
+import Swal from "sweetalert2"; // เพิ่มการ import Swal
+
 const Home = () => {
   const [restaurants, setRestaurants] = useState([]);
-  // const [keyword, setKeyword] = useState("");
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
 
   const handleSearch = (keyword) => {
@@ -17,43 +19,40 @@ const Home = () => {
       );
     });
     setFilteredRestaurants(result);
-    // console.log(result);
   };
+
   useEffect(() => {
-    //call api: getAllRestaurants
-    fetch("http://localhost:5000/api/v1/restaurants/")
-      .then((res) => {
-        //convert to JSON format
-        return res.json();
-      })
-      //save to state
-      .then((response) => {
-        setRestaurants(response);
-        setFilteredRestaurants(response);
-      })
-      //catch error !!!
-      .catch((err) => {
-        console.log(err.message);
-      });
-  }, []);
+    const getAllRestaurant = async () => {
+      try {
+        const response = await RestaurantService.getAllRestaurant();
+
+        if (response.status === 200) {
+          setRestaurants(response.data);
+          setFilteredRestaurants(response.data); // แสดงข้อมูลที่ได้รับ
+        }
+      } catch (error) {
+        Swal.fire({
+          title: "Get All Restaurants",
+          icon: "error",
+          text: error?.response?.data?.message || error.message,
+        });
+      }
+    };
+
+    getAllRestaurant(); // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลร้านอาหาร
+  }, []); //
+
   return (
-    <div className="container mx-auto ">
-      {
-        //Navigation Bar
-      }
-      {
-        //Header
-      }
+    <div className="container mx-auto">
+      {/* Navigation Bar, Header */}
       <div>
         <h1 className="title justify-center text-3xl text-center m-5 p-5">
           Grab Restaurant
         </h1>
       </div>
-      {
-        //Sreach Bar
-      }
-      <div className="mb-5 flex justify-center item-center">
-        <label className="input flex item-center gap-2 w-2xl">
+      {/* Search Bar */}
+      <div className="mb-5 flex justify-center items-center">
+        <label className="input flex items-center gap-2 w-2xl">
           <svg
             className="h-[1em] opacity-50"
             xmlns="http://www.w3.org/2000/svg"
